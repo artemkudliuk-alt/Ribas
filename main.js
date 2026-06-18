@@ -96,17 +96,64 @@ document.addEventListener("DOMContentLoaded", () => {
     let activeTargetScreen = null;
     let triggerFadeInFn = null;
 
+    let isVideoBlobReady = false;
+    let currentPercent = 0;
+
     // Dynamically set video source based on screen width (768px threshold)
     const isMobileDevice = window.innerWidth <= 768;
     const selectedVideoSource = isMobileDevice ? "Scroll_video_mobile_v2.mp4" : "Scroll_video_desktop_v2.mp4";
     
-    const videoSourceElement = document.createElement("source");
-    videoSourceElement.src = selectedVideoSource;
-    videoSourceElement.type = "video/mp4";
-    scrollVideo.appendChild(videoSourceElement);
-
-    // Force load scroll video immediately to fetch metadata
-    scrollVideo.load();
+    // Fetch video file as blob for 100% lag-free local scrubbing on remote servers (like Vercel)
+    fetch(selectedVideoSource)
+        .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            const contentLength = response.headers.get("Content-Length");
+            const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+            const reader = response.body.getReader();
+            let receivedBytes = 0;
+            
+            return new ReadableStream({
+                start(controller) {
+                    function read() {
+                        reader.read().then(({ done, value }) => {
+                            if (done) {
+                                controller.close();
+                                return;
+                            }
+                            receivedBytes += value.length;
+                            if (totalBytes > 0) {
+                                currentPercent = Math.floor((receivedBytes / totalBytes) * 100);
+                            }
+                            controller.enqueue(value);
+                            read();
+                        }).catch(err => {
+                            controller.error(err);
+                        });
+                    }
+                    read();
+                }
+            });
+        })
+        .then(stream => new Response(stream))
+        .then(response => response.blob())
+        .then(blob => {
+            const blobURL = URL.createObjectURL(blob);
+            scrollVideo.src = blobURL;
+            scrollVideo.load();
+            isVideoBlobReady = true;
+            currentPercent = 100;
+        })
+        .catch(err => {
+            console.error("Failed to fetch video as blob, falling back to direct stream:", err);
+            // Fallback: load directly if fetch fails
+            const videoSourceElement = document.createElement("source");
+            videoSourceElement.src = selectedVideoSource;
+            videoSourceElement.type = "video/mp4";
+            scrollVideo.appendChild(videoSourceElement);
+            scrollVideo.load();
+            isVideoBlobReady = true;
+            currentPercent = 100;
+        });
 
     // Proxy object for GSAP timeline animations
     const videoProxyState = { time: 0 };
@@ -135,13 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     scrollVideo.addEventListener("seeked", () => {
         isSeeking = false;
         
-        if (checkTargetReached && activeTargetConfig && Math.abs(scrollVideo.currentTime - activeTargetConfig.videoTime) < 0.25) {
-            checkTargetReached = false;
-            if (triggerFadeInFn) {
-                triggerFadeInFn();
-                triggerFadeInFn = null;
-            }
-        } else if (pendingSeekTime !== null) {
+        if (pendingSeekTime !== null) {
             const nextTarget = pendingSeekTime;
             pendingSeekTime = null;
             
@@ -172,32 +213,35 @@ document.addEventListener("DOMContentLoaded", () => {
     let loadValue = 0;
 
     const preloaderInterval = setInterval(() => {
-        // Increment percentage quickly to 35%, then slower, then wait for video readyState
-        if (loadValue < 35) {
-            loadValue += Math.floor(Math.random() * 5) + 3;
-        } else if (loadValue < 85) {
-            loadValue += Math.floor(Math.random() * 2) + 1;
-        } else if (loadValue < 99 && scrollVideo.readyState >= 1) {
+        if (loadValue < currentPercent) {
+            // Catch up to real progress smoothly
+            loadValue += Math.ceil((currentPercent - loadValue) * 0.1);
+            if (currentPercent - loadValue < 1) loadValue = currentPercent;
+        } else if (loadValue < 95 && !isVideoBlobReady) {
+            // Slow fake progress if progress is stalled or content-length header is missing
             loadValue += 1;
-        } else if (scrollVideo.readyState >= 1) {
-            loadValue = 100;
-            clearInterval(preloaderInterval);
-            
-            // Pulse fade out of preloader
-            gsap.to(preloader, {
-                opacity: 0,
-                duration: 0.8,
-                ease: "power2.out",
-                onComplete: () => {
-                    preloader.style.visibility = "hidden";
-                    triggerIntroAnimation(); // Run initial text slide-in
-                }
-            });
+        } else if (isVideoBlobReady && scrollVideo.readyState >= 1) {
+            if (loadValue < 100) {
+                loadValue += 1;
+            } else {
+                clearInterval(preloaderInterval);
+                
+                // Pulse fade out of preloader
+                gsap.to(preloader, {
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        preloader.style.visibility = "hidden";
+                        triggerIntroAnimation(); // Run initial text slide-in
+                    }
+                });
+            }
         }
 
         loaderPercent.textContent = `${loadValue}%`;
         loaderBar.style.width = `${loadValue}%`;
-    }, 45);
+    }, 30);
 
     // ----------------------------------------------------------------------
     // 5. INITIAL TEXT STATE CONFIG
@@ -333,12 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
             duration: flightDuration,
             ease: targetConfig.flightEase || "power2.inOut",
             onComplete: () => {
-                const timeDiff = Math.abs(scrollVideo.currentTime - targetConfig.videoTime);
-                if (!isSeeking || timeDiff < 0.25) {
-                    triggerFadeIn(); // Frame reached, trigger fade-in immediately
-                } else {
-                    checkTargetReached = true; // Wait for seeked listener
-                }
+                triggerFadeIn(); // Trigger fade-in immediately on GSAP timeline complete for snappy feedback
             }
         }, 0.2);
 
@@ -365,12 +404,8 @@ document.addEventListener("DOMContentLoaded", () => {
         timelineDots.forEach(d => d.classList.remove("active"));
         timelineDots[targetIndex].classList.add("active");
 
-        // Define the fade-in callback
-        triggerFadeInFn = triggerFadeIn;
-
         // E. FADE IN TARGET TEXT FUNCTION (Called when video reaches target frame)
         function triggerFadeIn() {
-            triggerFadeInFn = null;
             
             if (targetIndex === 0) {
                 heroVideo.currentTime = 0;
