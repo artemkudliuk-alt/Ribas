@@ -466,7 +466,7 @@ h1 {
     text-transform: uppercase;
     letter-spacing: -0.02em;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.5);
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
 }
 
 h2 {
@@ -478,7 +478,7 @@ h2 {
     text-transform: uppercase;
     letter-spacing: -0.01em;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75), 0 2px 6px rgba(0, 0, 0, 0.5);
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
 }
 
 .subtitle {
@@ -490,7 +490,7 @@ h2 {
     margin-bottom: 40px;
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.75), 0 1px 4px rgba(0, 0, 0, 0.5);
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
 }
 /* Secondary Typography for potential extra description */
 .secondary-text {
@@ -500,7 +500,7 @@ h2 {
 
 /* Initial styling for non-hero buttons */
 .screen-content .luxury-btn {
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
     font-family: var(--font-accent);
 }
 
@@ -866,7 +866,7 @@ h2 {
     display: flex;
     align-items: center;
     gap: 20px;
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
     opacity: 0;
 }
 

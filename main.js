@@ -207,15 +207,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const button = screen.querySelector(".luxury-btn");
 
         // Hide all texts initially
-        gsap.set(heading, { opacity: 0, y: 45, filter: "blur(12px)" });
-        if (subtitle) gsap.set(subtitle, { opacity: 0, y: 35, filter: "blur(8px)" });
-        if (button) gsap.set(button, { opacity: 0, y: 30, filter: "blur(6px)" });
+        gsap.set(heading, { opacity: 0, y: 45 });
+        if (subtitle) gsap.set(subtitle, { opacity: 0, y: 35 });
+        if (button) gsap.set(button, { opacity: 0, y: 30 });
 
         // Hide SPA advantages if present on this screen
         const rightCol = screen.querySelector(".spa-right-col");
         const rightItems = screen.querySelectorAll(".spa-advantage-item");
         if (rightCol) {
-            gsap.set(rightCol, { opacity: 0, y: 20, filter: "blur(12px)" });
+            gsap.set(rightCol, { opacity: 0, y: 20 });
             rightItems.forEach(item => {
                 gsap.set(item, { opacity: 0, x: 15 });
                 const icon = item.querySelector(".spa-advantage-icon");
@@ -251,9 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
         heroVideo.play().catch(e => console.log(e));
 
         const introTl = gsap.timeline();
-        introTl.to(heading, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" })
-               .to(subtitle, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 0.2)
-               .to(button, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 0.4)
+        introTl.to(heading, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" })
+               .to(subtitle, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 0.2)
+               .to(button, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 0.4)
                .to(contactsOverlay, { opacity: screenConfigs[0].contactsOpacity, y: 0, duration: 0.8 }, 0.2)
                .to(scrollIndicator, { opacity: screenConfigs[0].indicatorOpacity, duration: 0.8 }, 0.4);
     }
@@ -294,18 +294,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const tl = gsap.timeline();
 
         // A. FADE OUT CURRENT TEXT (0.4s duration)
-        tl.to(currentHeading, { opacity: 0, y: -45, filter: "blur(12px)", duration: 0.4, ease: "power2.in" }, 0);
+        tl.to(currentHeading, { opacity: 0, y: -45, duration: 0.4, ease: "power2.in" }, 0);
         if (currentSubtitle) {
-            tl.to(currentSubtitle, { opacity: 0, y: -35, filter: "blur(8px)", duration: 0.4, ease: "power2.in" }, 0.05);
+            tl.to(currentSubtitle, { opacity: 0, y: -35, duration: 0.4, ease: "power2.in" }, 0.05);
         }
 
         if (currentConfig.hasButton && currentBtn) {
-            tl.to(currentBtn, { opacity: 0, y: -30, filter: "blur(6px)", duration: 0.4, ease: "power2.in" }, 0);
+            tl.to(currentBtn, { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, 0);
         }
 
         const currentRightCol = currentScreen.querySelector(".spa-right-col");
         if (currentRightCol) {
-            tl.to(currentRightCol, { opacity: 0, y: 20, filter: "blur(6px)", duration: 0.35, ease: "power2.in" }, 0);
+            tl.to(currentRightCol, { opacity: 0, y: 20, duration: 0.35, ease: "power2.in" }, 0);
         }
 
         // Deactivate old screen visibility
@@ -383,16 +383,16 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             // Prep target positions & show layout
-            gsap.set(targetHeading, { y: 45, opacity: 0, filter: "blur(12px)" });
-            if (targetSubtitle) gsap.set(targetSubtitle, { y: 35, opacity: 0, filter: "blur(8px)" });
+            gsap.set(targetHeading, { y: 45, opacity: 0 });
+            if (targetSubtitle) gsap.set(targetSubtitle, { y: 35, opacity: 0 });
             if (targetConfig.hasButton && targetBtn) {
-                gsap.set(targetBtn, { y: 30, opacity: 0, filter: "blur(6px)" });
+                gsap.set(targetBtn, { y: 30, opacity: 0 });
             }
             
             const rightCol = targetScreen.querySelector(".spa-right-col");
             const rightItems = targetScreen.querySelectorAll(".spa-advantage-item");
             if (rightCol) {
-                gsap.set(rightCol, { opacity: 0, y: 20, filter: "blur(12px)" });
+                gsap.set(rightCol, { opacity: 0, y: 20 });
                 rightItems.forEach(item => {
                     gsap.set(item, { opacity: 0, x: 15 });
                     const icon = item.querySelector(".spa-advantage-icon");
@@ -412,17 +412,17 @@ document.addEventListener("DOMContentLoaded", () => {
             targetScreen.classList.add("active");
 
             // Luxury Word-by-word feel staggers
-            textTl.to(targetHeading, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power2.out" }, 0);
+            textTl.to(targetHeading, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" }, 0);
             if (targetSubtitle) {
-                textTl.to(targetSubtitle, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power2.out" }, 0.15);
+                textTl.to(targetSubtitle, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" }, 0.15);
             }
 
             if (targetConfig.hasButton && targetBtn) {
-                textTl.to(targetBtn, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power2.out" }, 0.35);
+                textTl.to(targetBtn, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" }, 0.35);
             }
 
             if (rightCol) {
-                textTl.to(rightCol, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.65, ease: "power2.out" }, 0.2);
+                textTl.to(rightCol, { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" }, 0.2);
                 
                 rightItems.forEach((item, idx) => {
                     const itemDelay = 0.35 + (idx * 0.08);
